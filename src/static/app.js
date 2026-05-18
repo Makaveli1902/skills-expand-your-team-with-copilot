@@ -474,6 +474,46 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function getShareContent(activityName) {
+    const activityUrl = new URL(window.location.href);
+    activityUrl.searchParams.set("activity", activityName);
+
+    const shareUrl = activityUrl.toString();
+    const shareText = `Check out the ${activityName} activity at Mergington High School!`;
+    const emailSubject = `Mergington Activity: ${activityName}`;
+    const emailBody = `${shareText}\n${shareUrl}`;
+
+    return {
+      shareUrl,
+      encodedUrl: encodeURIComponent(shareUrl),
+      encodedText: encodeURIComponent(shareText),
+      encodedEmailSubject: encodeURIComponent(emailSubject),
+      encodedEmailBody: encodeURIComponent(emailBody),
+    };
+  }
+
+  async function copyToClipboard(text) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error copying text:", error);
+      return false;
+    }
+  }
+
   // Function to render a single activity card
   function renderActivityCard(name, details) {
     const activityCard = document.createElement("div");
@@ -500,6 +540,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
+    const shareContent = getShareContent(name);
 
     // Create activity tag
     const tagHtml = `
@@ -571,6 +612,41 @@ document.addEventListener("DOMContentLoaded", () => {
         `
         }
       </div>
+      <div class="share-actions" aria-label="Share this activity">
+        <a
+          class="share-button"
+          href="https://www.facebook.com/sharer/sharer.php?u=${shareContent.encodedUrl}"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Share ${name} on Facebook"
+        >
+          Facebook
+        </a>
+        <a
+          class="share-button"
+          href="https://twitter.com/intent/tweet?text=${shareContent.encodedText}&url=${shareContent.encodedUrl}"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Share ${name} on X"
+        >
+          X
+        </a>
+        <a
+          class="share-button"
+          href="mailto:?subject=${shareContent.encodedEmailSubject}&body=${shareContent.encodedEmailBody}"
+          aria-label="Share ${name} by email"
+        >
+          Email
+        </a>
+        <button
+          type="button"
+          class="share-button copy-share-link"
+          data-share-url="${shareContent.encodedUrl}"
+          aria-label="Copy link for ${name}"
+        >
+          Copy Link
+        </button>
+      </div>
     `;
 
     // Add click handlers for delete buttons
@@ -588,6 +664,18 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     }
+
+    const copyButton = activityCard.querySelector(".copy-share-link");
+    copyButton.addEventListener("click", async (event) => {
+      const encodedUrl = event.currentTarget.dataset.shareUrl;
+      const copied = await copyToClipboard(decodeURIComponent(encodedUrl));
+
+      if (copied) {
+        showMessage("Activity link copied to clipboard.", "success");
+      } else {
+        showMessage("Couldn't copy the link. Please try again.", "error");
+      }
+    });
 
     activitiesList.appendChild(activityCard);
   }
