@@ -32,6 +32,24 @@
   --info-light: #d1ecf1;
 }
 
+body.dark-mode {
+  --primary: #303f9f;
+  --primary-light: #5c6bc0;
+  --primary-dark: #283593;
+  --background: #121212;
+  --surface: #1e1e1e;
+  --text-primary: #f1f1f1;
+  --text-secondary: #c2c2c2;
+  --border: #3c3c3c;
+  --border-light: #2a2a2a;
+  --border-focus: #616161;
+  --info: #9ad7e0;
+  --info-light: #1b3438;
+  --warning-light: #3f3200;
+  --error-light: #4c1f1f;
+  --success-light: #1f3a21;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -617,6 +635,10 @@ footer {
   position: absolute;
   top: 10px;
   right: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
 }
 
 #user-status {
@@ -663,4 +685,8 @@ footer {
 
 #logout-button:hover {
   background-color: rgba(255, 255, 255, 0.3);
+}
+
+#theme-toggle {
+  font-size: 0.8rem;
 }
